@@ -314,8 +314,14 @@ def main():
     # Preprocessing the datasets.
     # First we tokenize all the texts.
     def extract_targets(examples):
+        print("---------> EXAMPLES:", len(examples["premise"]))
+        print(type(examples))
+        print(examples.data.keys())
+        print(examples)
         targets = examples["label"]
         targets = [int(target) for target in targets]
+        print("--------> targets")
+        print(targets)
         return {"targets": targets}   
     
     if training_args.do_train:
