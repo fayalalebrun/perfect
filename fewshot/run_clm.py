@@ -89,7 +89,6 @@ def main():
     transformers.utils.logging.set_verbosity(log_level)
     transformers.utils.logging.enable_default_handler()
     transformers.utils.logging.enable_explicit_format()
-
     # Log on each process the small summary:
     logger.warning(
         f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
@@ -316,7 +315,7 @@ def main():
     def extract_targets(examples):
         targets = examples["label"]
         #targets = [int(target) for target in targets]
-        print(targets)
+
         return {"targets": targets}   
     
     if training_args.do_train:

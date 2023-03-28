@@ -1226,8 +1226,10 @@ class RobertaForMaskedLM(RobertaPreTrainedModel):
                 # let assume we have X mask tokens, we have a logit for each mask location.
                 # after reshape, mask_logits are of shape: (batch_size x num_extra_tokens)x(num_labels)
                 # mask_labels is of shape: (batch_size x num_extra_tokens)
-                total_loss = loss_fct(masks_logits.contiguous().view(-1, total_tokens),
-                                      mask_labels.reshape((64, -1))).view(batch_size, -1).mean(dim=-1).view(batch_size, 1).mean()
+
+                input = masks_logits.contiguous().view(-1, total_tokens)
+                total_loss = loss_fct(input,
+                                      mask_labels.reshape(input.shape)).view(batch_size, -1).mean(dim=-1).view(batch_size, 1).mean()
 
                 # This is only if we use these logits for eval, as the loss, we compute the loss by computing the 
                 # average over the mask tokens.
