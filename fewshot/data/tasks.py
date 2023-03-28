@@ -54,7 +54,7 @@ class AbstractTask(abc.ABC):
                 if self.task == "twitter":
                     # Sample labels for multi-label task
                     # Also check that the sample has not been added before (can happen for multi-label samples)
-                    data = shuffled_train.filter(lambda example: (label in example['label'] and (example not in sampled_train)))
+                    data = shuffled_train.filter(lambda example: ((example["label"][label] > 0) and (example not in sampled_train)))
                 else:
                     data = shuffled_train.filter(lambda example: int(example['label']) == label)
 

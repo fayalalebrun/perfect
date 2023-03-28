@@ -40,6 +40,10 @@ for f in all_csvs:
             if val  == 1:
                 sample["label"].append(all_labels[col])
 
+        one_hot = [0] * label_count
+        for label in sample["label"]: one_hot[label] = 1
+        sample["label"] = one_hot
+
         sample = json.dumps(sample)
         all_samples.append(sample)
 

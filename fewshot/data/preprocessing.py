@@ -79,8 +79,13 @@ class MLMProcessor(torch.nn.Module):
         input_ids = input_ids + [self.pad_token_id] * n_mask
         attention_mask = attention_mask + [0] * n_mask
         extra_fields = self.processor.get_extra_fields(example=example)
+        if isinstance(target, list):
+            labels = [int(x) for x in target]
+        else:
+            labels = int(target)
+            
         return {
-            'labels': int(target),
+            'labels': labels,
             'attention_mask': attention_mask,
             'input_ids': input_ids,
             'extra_fields': extra_fields
@@ -136,9 +141,14 @@ class MLMProcessor(torch.nn.Module):
 
         extra_fields = self.processor.get_extra_fields(example=example)
 
+        if isinstance(target, list):
+            labels = [int(x) for x in target]
+        else:
+            labels = int(target)
+
         return {
             'candidates_ids': candidates_ids,
-            'labels': int(target),
+            'labels': labels,
             'attention_mask': attention_mask,
             'input_ids': input_ids,
             'extra_fields': extra_fields
