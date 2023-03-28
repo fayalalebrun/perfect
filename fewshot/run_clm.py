@@ -314,9 +314,6 @@ def main():
     # Preprocessing the datasets.
     # First we tokenize all the texts.
     def extract_targets(examples):
-        print(type(examples))
-        print(examples.data.keys())
-        print(examples)
         targets = examples["label"]
         #targets = [int(target) for target in targets]
         print(targets)
@@ -408,6 +405,8 @@ def main():
         metrics=task.metric,
         extra_info = extra_info,
     )
+
+    print("Training dataset", trainer.train_dataset.data)
 
     if trainer.is_world_process_zero():
        os.makedirs(training_args.output_dir, exist_ok=True)

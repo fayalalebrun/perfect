@@ -1208,7 +1208,7 @@ class RobertaForMaskedLM(RobertaPreTrainedModel):
     def compute_pet_with_extra_tokens_loss(self, input_ids, logits, labels, candidates_ids, hidden_states):
             # this for batch for now forget about it.
             if self.token_hinge_loss:
-                loss_fct = torch.nn.MultiMarginLoss(reduction='none')
+                loss_fct = torch.nn.MultiLabelMarginLoss(reduction='none')
             else:
                 loss_fct = CrossEntropyLoss(reduction='none')
 
@@ -1227,7 +1227,7 @@ class RobertaForMaskedLM(RobertaPreTrainedModel):
                 # after reshape, mask_logits are of shape: (batch_size x num_extra_tokens)x(num_labels)
                 # mask_labels is of shape: (batch_size x num_extra_tokens)
                 total_loss = loss_fct(masks_logits.contiguous().view(-1, total_tokens),
-                                      mask_labels).view(batch_size, -1).mean(dim=-1).view(batch_size, 1).mean()
+                                      mask_labels.reshape((64, -1))).view(batch_size, -1).mean(dim=-1).view(batch_size, 1).mean()
 
                 # This is only if we use these logits for eval, as the loss, we compute the loss by computing the 
                 # average over the mask tokens.

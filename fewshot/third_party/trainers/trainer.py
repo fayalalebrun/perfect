@@ -97,7 +97,7 @@ class BaseTrainer(Trainer):
         self.eval_targets = eval_targets
         self.task = task
         self.metrics = metrics
-        self.extra_info = extra_info 
+        self.extra_info = extra_info
 
     def evaluate(
         self,
