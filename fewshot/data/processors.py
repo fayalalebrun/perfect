@@ -95,7 +95,9 @@ class MR(AbstractProcessor):
 
     def get_verbalizers(self):
         return ["terrible", "great"]
-    
+
+class Twitter(MR):
+    name = "twitter"
 
 class CR(MR):
     name = "cr"
@@ -441,6 +443,7 @@ PROCESSOR_MAPPING = OrderedDict(
         ('trec', Trec),
         ('SST-2', SST2),
         ('sst-5', SST5),
+        ('twitter', Twitter),
         #superglue datasets 
         ('boolq', BoolQ),
         ('rte', RTE),

@@ -4,7 +4,7 @@ import pandas as pd
 # Load all .csv files
 parser = argparse.ArgumentParser(description="Create train and test set for Twitter dataset in the PERFECT format")
 parser.add_argument('-dir', dest='directory', type=str, help="Directory with Twitter dataset")
-parser.add_argument('-out_dir', dest='out_dir', default="datasets_processed/twitter", type=str, help="Directory to store test and train sets")
+parser.add_argument('-out_dir', dest='out_dir', default="fewshot/datasets_processed/twitter", type=str, help="Directory to store test and train sets")
 args = parser.parse_args()
 
 directory = args.directory
@@ -40,7 +40,7 @@ for f in all_csvs:
             if val  == 1:
                 sample["label"].append(all_labels[col])
 
-        sample["label"] = str(sample["label"])
+        sample = json.dumps(sample)
         all_samples.append(sample)
 
 random.seed(10)

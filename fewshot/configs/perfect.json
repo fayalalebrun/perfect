@@ -1,6 +1,6 @@
 {
-   "task": "rte", 
-   "max_seq_length": 256, 
+   "task": "twitter", 
+   "max_seq_length": 281, 
    "per_device_train_batch_size": 32,
    "K": 16,
    "data_dir": "datasets_processed",

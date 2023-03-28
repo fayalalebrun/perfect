@@ -15,6 +15,12 @@ from collections import Counter
 
 from fewshot.metrics import metrics
 
+def flatten_list(l):
+    flattened = []
+    for l1 in l:
+        for l2 in l1:
+            flattened.append(l2)
+    return flattened
 
 class AbstractTask(abc.ABC):
     task = NotImplemented
@@ -39,19 +45,30 @@ class AbstractTask(abc.ABC):
             datasets["test"] = datasets["validation"]
 
         if self.task in ["mr", "cr", "subj", "SST-2", "trec",  "sst-5",
-                         "boolq", "rte", "cb", "wic", "qnli", "qqp", "mrpc"]:
+                         "boolq", "rte", "cb", "wic", "qnli", "qqp", "mrpc", "twitter"]:
             # First filter, then shuffle, otherwise this results in a bug.
             # Samples `num_samples` elements from train as training and development sets.
             sampled_train = []
             sampled_dev = []
             for label in range(self.num_labels):
-                data = shuffled_train.filter(lambda example: int(example['label']) == label)
-                print(label, np.unique(data["label"]))
+                if self.task == "twitter":
+                    # Sample labels for multi-label task
+                    # Also check that the sample has not been added before (can happen for multi-label samples)
+                    data = shuffled_train.filter(lambda example: (label in example['label'] and (example not in sampled_train)))
+                else:
+                    data = shuffled_train.filter(lambda example: int(example['label']) == label)
+
+                print(label, np.unique(np.array(data["label"]).flatten()))
+                
                 num_samples = min(len(data)//2, self.num_samples)
-                print(num_samples)
+                print("Number of samples per label:", num_samples)
+                
                 sampled_train.append(data.select([i for i in range(num_samples)]))
                 sampled_dev.append(data.select([i for i in range(num_samples, num_samples*2)]))
 
+            assert len(sampled_train) == len(set(sampled_train))
+            assert len(sampled_dev) == len(set(sampled_dev))
+            
             # Joins the sampled data per label.
             datasets["train"] = concatenate_datasets(sampled_train)
             datasets["validation"] = concatenate_datasets(sampled_dev)
@@ -62,8 +79,12 @@ class AbstractTask(abc.ABC):
         if self.num_samples is not None:
             datasets = self.sample_datasets(datasets)
             datasets = self.post_processing(datasets)
-            label_distribution_train = Counter(datasets["train"]["label"])
-            label_distribution_dev = Counter(datasets["validation"]["label"])
+            if self.task != "twitter":
+                label_distribution_train = Counter(datasets["train"]["label"])
+                label_distribution_dev = Counter(datasets["validation"]["label"])
+            else:
+                label_distribution_train = Counter(flatten_list(datasets["train"]["label"]))
+                label_distribution_dev = Counter(flatten_list(datasets["validation"]["label"]))
         return datasets 
 
 
@@ -107,6 +128,12 @@ class SST5(MR):
     task = "sst-5"
     num_labels = 5
     metric = [metrics.accuracy]
+
+class Twitter(MR):
+    task = "twitter"
+    num_labels = 11
+    metric = metrics.accuracy
+
     
 class BoolQ(AbstractTask):
     task = "boolq"
@@ -170,6 +197,7 @@ TASK_MAPPING = OrderedDict(
         ('trec', Trec),
         ('SST-2', SST2),
         ('sst-5', SST5),
+        ('twitter', Twitter),
         # superglue datasets.
         ('boolq', BoolQ),
         ('rte', RTE),
