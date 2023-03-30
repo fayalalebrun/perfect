@@ -8,11 +8,11 @@ from sklearn.metrics import f1_score
 from collections import defaultdict
 
 # From: https://mmuratarat.github.io/2020-01-25/multilabel_classification_metrics
-def accuracy_multilabel(y_pred, y_true):
+def accuracy_multilabel(y_pred, y_true, extra_info=None):
     temp = 0
-    for i in range(y_true.shape[0]):
+    for i in range(len(y_true)):
         temp += sum(np.logical_and(y_true[i], y_pred[i])) / sum(np.logical_or(y_true[i], y_pred[i]))
-    return temp / y_true.shape[0]
+    return {"accuracy": temp / len(y_true)}
 
 def accuracy(predictions, targets, extra_info=None) -> dict:
     """Computes the average accuracy."""
