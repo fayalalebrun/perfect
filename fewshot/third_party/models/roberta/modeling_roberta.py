@@ -1228,6 +1228,7 @@ class RobertaForMaskedLM(RobertaPreTrainedModel):
                 # mask_labels is of shape: (batch_size x num_extra_tokens)
 
                 input = masks_logits.contiguous().view(-1, total_tokens)
+
                 total_loss = loss_fct(input,
                                       mask_labels.reshape(input.shape)).view(batch_size, -1).mean(dim=-1).view(batch_size, 1).mean()
 

@@ -51,7 +51,7 @@ class AbstractProcessor(abc.ABC):
     def get_extra_fields(self, example=None):
        # If there is a need to keep extra information, here we keep a dictionary
        # from keys to their values.
-       return {} 
+       return None #{}
 
     def get_classification_parts(self, example):
           pass 

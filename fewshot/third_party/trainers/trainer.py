@@ -251,9 +251,9 @@ class BaseTrainer(Trainer):
         
         result = torch.tensor([log_probs])
         
-        if self.args.prototypical_eval:
-            result = result.squeeze()
-            result = result.permute(1, 0)
+        #if self.args.prototypical_eval:
+        #    result = result.squeeze()
+        #    result = result.permute(1, 0)
         return result 
 
     def get_masks_embeds(self, model, batch):
@@ -275,7 +275,7 @@ class BaseTrainer(Trainer):
         across all samples of each label. 
         Returns a dictionary from labels to embedding size of shape [num_tokens, hidden_dim]"""
         def get_label_samples(dataset, label):
-            return dataset.filter(lambda example: int(example['labels']) == label)
+            return dataset.filter(lambda example: example['labels'][label] > 0)
         label_to_token_centroids = {}
         for label in range(self.model.config.num_labels):
             data = get_label_samples(self.train_dataset, label)
