@@ -1,1 +1,7 @@
 .idea/
+datasets_processed/
+fewshot.egg-info/
+**/__pycache__/
+fewshot/outputs/
+fewshot/configs/
+MFTC/

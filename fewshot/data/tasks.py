@@ -132,7 +132,7 @@ class SST5(MR):
 class Twitter(MR):
     task = "twitter"
     num_labels = 11
-    metric = [metrics.accuracy_multilabel]
+    metric = [metrics.multilabel_accuracy_mse_based]
 
     
 class BoolQ(AbstractTask):

@@ -7,10 +7,22 @@ import numpy as np
 from sklearn.metrics import f1_score
 from collections import defaultdict
 
+
+def multilabel_accuracy_mse_based(y_pred, y_true, extra_info=None):
+    mse = 0
+    for i in range(len(y_true)):
+       mse += np.mean(np.square(y_pred[i] - y_true[i]))
+    mse = mse / len(y_true)
+    mse = 1 - mse
+    return {"mse_ accuracy": mse}
+
 # From: https://mmuratarat.github.io/2020-01-25/multilabel_classification_metrics
 def accuracy_multilabel(y_pred, y_true, extra_info=None):
     temp = 0
+    print(len(y_true), len(y_pred))
+
     for i in range(len(y_true)):
+        print(len(y_true[i]), len(y_pred[i]))
         temp += sum(np.logical_and(y_true[i], y_pred[i])) / sum(np.logical_or(y_true[i], y_pred[i]))
     return {"accuracy": temp / len(y_true)}
 
