@@ -9,10 +9,9 @@ from collections import defaultdict
 
 
 def multilabel_accuracy_mse_based(y_pred, y_true, extra_info=None):
-    mse = 0
-    for i in range(len(y_true)):
-       mse += np.mean(np.square(y_pred[i] - y_true[i]))
-    mse = mse / len(y_true)
+    y_pred = np.concatenate(y_pred)
+    y_true = np.concatenate(y_true)
+    mse = np.mean(np.square(y_pred - y_true))
     mse = 1 - mse
     return {"mse_ accuracy": mse}
 
@@ -20,6 +19,7 @@ def multilabel_accuracy_mse_based(y_pred, y_true, extra_info=None):
 def accuracy_multilabel(y_pred, y_true, extra_info=None):
     temp = 0
     print(len(y_true), len(y_pred))
+
 
     for i in range(len(y_true)):
         print(len(y_true[i]), len(y_pred[i]))

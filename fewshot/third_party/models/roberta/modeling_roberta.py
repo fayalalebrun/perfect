@@ -1208,29 +1208,32 @@ class RobertaForMaskedLM(RobertaPreTrainedModel):
     def compute_pet_with_extra_tokens_loss(self, input_ids, logits, labels, candidates_ids, hidden_states):
             # this for batch for now forget about it.
             if self.token_hinge_loss:
-                loss_fct = torch.nn.MultiLabelMarginLoss(reduction='none')
+                loss_fct = torch.nn.MultiLabelMarginLoss(reduction='mean')
+                #loss_fct = torch.nn.BCEWithLogitsLoss()
             else:
-                loss_fct = CrossEntropyLoss(reduction='none')
+                loss_fct = CrossEntropyLoss(reduction='none')                
 
             total_tokens = self.num_extra_tokens
-            
             batch_size = input_ids.shape[0]
             mask_indices = (input_ids == self.config.mask_token_id).nonzero()[:, -1].view(batch_size, -1)
             masks_logits = logits[torch.arange(batch_size).unsqueeze(-1), mask_indices] # batch_size x num_masks x num_labels
+            
+            
 
-            masks_logits = self.map_logits_per_token(masks_logits) # batch_size x num_masks x num_labels 
+            masks_logits = self.map_logits_per_token(masks_logits) # batch_size x num_masks x num_labels
             mask_labels = torch.cat([self.map_labels_per_token(i) for i in labels]).squeeze() 
             total_tokens = self.config.num_labels
+
            
             if self.multiclass_ce_loss or self.token_hinge_loss:
                 # let assume we have X mask tokens, we have a logit for each mask location.
                 # after reshape, mask_logits are of shape: (batch_size x num_extra_tokens)x(num_labels)
                 # mask_labels is of shape: (batch_size x num_extra_tokens)
-
+                
                 input = masks_logits.contiguous().view(-1, total_tokens)
-
                 total_loss = loss_fct(input,
-                                      mask_labels.reshape(input.shape)).view(batch_size, -1).mean(dim=-1).view(batch_size, 1).mean()
+                                      mask_labels.view(input.shape))
+                
 
                 # This is only if we use these logits for eval, as the loss, we compute the loss by computing the 
                 # average over the mask tokens.

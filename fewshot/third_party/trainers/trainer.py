@@ -212,24 +212,23 @@ class BaseTrainer(Trainer):
         y_hats = []
         labels = []
         for _, inputs in enumerate(dataloader):
+
             inputs = self._prepare_inputs(inputs)
             with torch.no_grad():
                 if self.args.train_classifier or self.args.classifier_eval:
                     logits = model(**inputs)["logits"]
                 else:
                     logits = self.evaluate_pet(model, inputs, centroids=centroids)
-                
+
                 #y_hat = torch.argmax(logits, axis=1).cpu().detach().numpy()
                 y_hat = logits.view(logits.shape[0], -1).cpu().detach().numpy()
-                y_hat = np.where(y_hat > 0.85, 1, 0)
                 y_hats.extend(y_hat) 
                 labels.extend(inputs["labels"].cpu().detach().numpy())
-
         results = {}
         for metric in self.metrics:
-            
+
             results.update(metric(y_hats, labels, extra_info))
-        results["average"] = np.mean(list(results.values()))
+
         return results
 
     def evaluate_pet(self, model, batch, centroids=None):
