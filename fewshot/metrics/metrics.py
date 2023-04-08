@@ -15,16 +15,45 @@ def lrap(y_pred, y_true, extra_info=None):
 
     return {"lrap": label_ranking_average_precision_score(y_true, y_pred)}
 
+def f1_multilabel_multioutput(y_pred, y_true, extra_info=None):
+    y_pred = np.stack(y_pred)
+    y_true = np.stack(y_true)
+
+    # if any entry >= 0.5 set to 1 else 0
+    y_pred = np.where(y_pred >= 0.5, 1, 0)
+
+    # calculate f1 score per label
+    f1_scores = []
+    for i in range(y_true.shape[1]):
+        f1_scores.append(f1_score(y_true[:, i], y_pred[:, i]))
+    
+    # calculate average f1 score
+    f1_scores = np.array(f1_scores)
+    f1_scores = np.mean(f1_scores)
+
+    return {"f1": f1_scores}
+
 def coverage(y_pred, y_true, extra_info=None):
     y_pred = np.stack(y_pred)
     y_true = np.stack(y_true)
 
+    # if any entry >= 0.5 set to 1 else 0
+    y_pred = np.where(y_pred >= 0.5, 1, 0)
+
     return {"coverage": coverage_error(y_true, y_pred)}
-    
+
+def mse_multioutput(y_pred, y_true, extra_info=None):
+    y_pred = np.stack(y_pred)
+    y_true = np.stack(y_true)
+
+    mse = np.mean(np.square(y_pred - y_true))
+    return {"mse": mse}
 
 def multilabel_accuracy_mse_based(y_pred, y_true, extra_info=None):
     y_pred = np.stack(y_pred)
     y_true = np.stack(y_true)
+    # if any entry >= 0.5 set to 1 else 0
+    y_pred = np.where(y_pred >= 0.5, 1, 0)
     mse = np.mean(np.square(y_pred - y_true))
     mse = 1 - mse
     return {"mse_ accuracy": mse}
@@ -32,11 +61,7 @@ def multilabel_accuracy_mse_based(y_pred, y_true, extra_info=None):
 # From: https://mmuratarat.github.io/2020-01-25/multilabel_classification_metrics
 def accuracy_multilabel(y_pred, y_true, extra_info=None):
     temp = 0
-    print(len(y_true), len(y_pred))
-
-
     for i in range(len(y_true)):
-        print(len(y_true[i]), len(y_pred[i]))
         temp += sum(np.logical_and(y_true[i], y_pred[i])) / sum(np.logical_or(y_true[i], y_pred[i]))
     return {"accuracy": temp / len(y_true)}
 

@@ -5,6 +5,7 @@ import numpy as np
 
 import time
 import math
+from sklearn.metrics import hamming_loss
 import torch
 from typing import Dict, List, Optional, Union, Any
 from torch.utils.checkpoint import checkpoint_sequential
@@ -15,6 +16,8 @@ from torch.utils.data.distributed import DistributedSampler
 from torch import nn
 import torch.nn.functional as F
 import collections
+from scipy.special import softmax
+
 
 
 from transformers import __version__
@@ -468,3 +471,26 @@ class BaseTrainer(Trainer):
             self.optimizer = smp.DistributedOptimizer(self.optimizer)
 
         return self.optimizer
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.get("labels")
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get("logits")
+
+        for i in range(len(logits)):
+            logits[i] = nn.Softmax(dim=0)(logits[i])
+
+        
+        # print("logits", logits)
+
+        # compute multimargin loss for multi-label and mutli-output classification
+        loss_fct = nn.MultiLabelSoftMarginLoss(reduction='mean')
+        loss = loss_fct(logits, labels)
+
+
+        # # mse version
+        # loss = ((logits - labels)**2).sum()/len(labels[0])
+        # loss = loss/len(logits)
+
+        return loss
