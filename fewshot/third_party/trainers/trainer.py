@@ -221,8 +221,8 @@ class BaseTrainer(Trainer):
                     logits = self.evaluate_pet(model, inputs, centroids=centroids)
 
                 #y_hat = torch.argmax(logits, axis=1).cpu().detach().numpy()
-                y_hat = logits.view(logits.shape[0], -1).cpu().detach().numpy()
-                y_hats.extend(y_hat) 
+                y_hat = logits.cpu().detach().numpy()
+                y_hats.extend(y_hat)
                 labels.extend(inputs["labels"].cpu().detach().numpy())
         results = {}
         for metric in self.metrics:
@@ -254,9 +254,9 @@ class BaseTrainer(Trainer):
         
         result = torch.tensor([log_probs])
         
-        #if self.args.prototypical_eval:
-        #    result = result.squeeze()
-        #    result = result.permute(1, 0)
+        if self.args.prototypical_eval:
+            result = result.squeeze()
+            result = result.permute(1, 0)
         return result 
 
     def get_masks_embeds(self, model, batch):

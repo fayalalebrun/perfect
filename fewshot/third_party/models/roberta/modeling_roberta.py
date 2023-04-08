@@ -1203,15 +1203,10 @@ class RobertaForMaskedLM(RobertaPreTrainedModel):
             return logits[torch.arange(logits.shape[0]), :, torch.arange(logits.shape[2])]
 
     def map_labels_per_token(self, label):
-        return label.repeat(self.num_masks).view(-1) #torch.tensor([label] * (self.num_masks)).view(-1).cuda()
+        return label.repeat(self.num_masks, 1) #torch.tensor([label] * (self.num_masks)).view(-1).cuda()
      
     def compute_pet_with_extra_tokens_loss(self, input_ids, logits, labels, candidates_ids, hidden_states):
-            # this for batch for now forget about it.
-            if self.token_hinge_loss:
-                loss_fct = torch.nn.MultiLabelMarginLoss(reduction='mean')
-                #loss_fct = torch.nn.BCEWithLogitsLoss()
-            else:
-                loss_fct = CrossEntropyLoss(reduction='none')                
+
 
             total_tokens = self.num_extra_tokens
             batch_size = input_ids.shape[0]
@@ -1221,18 +1216,24 @@ class RobertaForMaskedLM(RobertaPreTrainedModel):
             
 
             masks_logits = self.map_logits_per_token(masks_logits) # batch_size x num_masks x num_labels
-            mask_labels = torch.cat([self.map_labels_per_token(i) for i in labels]).squeeze() 
+            mask_labels = torch.stack([self.map_labels_per_token(i) for i in labels]).squeeze() 
             total_tokens = self.config.num_labels
+
+                        # this for batch for now forget about it.
+            if self.token_hinge_loss:
+                loss_fct = torch.nn.MultiLabelMarginLoss(reduction='mean')
+                #loss_fct = torch.nn.BCEWithLogitsLoss(pos_weight=30.0*torch.ones_like(mask_labels))
+            else:
+                loss_fct = CrossEntropyLoss(reduction='none')
 
            
             if self.multiclass_ce_loss or self.token_hinge_loss:
                 # let assume we have X mask tokens, we have a logit for each mask location.
                 # after reshape, mask_logits are of shape: (batch_size x num_extra_tokens)x(num_labels)
                 # mask_labels is of shape: (batch_size x num_extra_tokens)
-                
-                input = masks_logits.contiguous().view(-1, total_tokens)
-                total_loss = loss_fct(input,
-                                      mask_labels.view(input.shape))
+
+                total_loss = loss_fct(masks_logits.contiguous().view(-1, total_tokens),
+                                      mask_labels.contiguous().view(-1, total_tokens))
                 
 
                 # This is only if we use these logits for eval, as the loss, we compute the loss by computing the 

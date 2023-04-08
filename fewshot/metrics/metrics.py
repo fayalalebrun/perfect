@@ -4,13 +4,27 @@
 # LICENSE file in the root directory of this source tree.
 
 import numpy as np
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, coverage_error, label_ranking_average_precision_score
 from collections import defaultdict
 
 
+def lrap(y_pred, y_true, extra_info=None):
+    y_pred = np.stack(y_pred)
+    y_true = np.stack(y_true)
+
+
+    return {"lrap": label_ranking_average_precision_score(y_true, y_pred)}
+
+def coverage(y_pred, y_true, extra_info=None):
+    y_pred = np.stack(y_pred)
+    y_true = np.stack(y_true)
+
+    return {"coverage": coverage_error(y_true, y_pred)}
+    
+
 def multilabel_accuracy_mse_based(y_pred, y_true, extra_info=None):
-    y_pred = np.concatenate(y_pred)
-    y_true = np.concatenate(y_true)
+    y_pred = np.stack(y_pred)
+    y_true = np.stack(y_true)
     mse = np.mean(np.square(y_pred - y_true))
     mse = 1 - mse
     return {"mse_ accuracy": mse}
