@@ -480,13 +480,12 @@ class BaseTrainer(Trainer):
 
         for i in range(len(logits)):
             logits[i] = nn.Softmax(dim=0)(logits[i])
-
         
         # print("logits", logits)
 
         # compute multimargin loss for multi-label and mutli-output classification
-        loss_fct = nn.MultiLabelSoftMarginLoss(reduction='mean')
-        loss = loss_fct(logits, labels)
+        loss_fct = nn.BCEWithLogitsLoss()  #nn.MultiLabelSoftMarginLoss(reduction='mean')
+        loss = loss_fct(logits, labels.float())
 
 
         # # mse version
@@ -494,3 +493,5 @@ class BaseTrainer(Trainer):
         # loss = loss/len(logits)
 
         return loss
+    
+   
