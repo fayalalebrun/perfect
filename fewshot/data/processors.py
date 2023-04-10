@@ -99,6 +99,9 @@ class MR(AbstractProcessor):
 class Twitter(MR):
     name = "twitter"
 
+class Reddit(MR):
+    name = "reddit"
+
 class CR(MR):
     name = "cr"
  
@@ -444,6 +447,7 @@ PROCESSOR_MAPPING = OrderedDict(
         ('SST-2', SST2),
         ('sst-5', SST5),
         ('twitter', Twitter),
+        ('reddit', Reddit),
         #superglue datasets 
         ('boolq', BoolQ),
         ('rte', RTE),

@@ -45,13 +45,13 @@ class AbstractTask(abc.ABC):
             datasets["test"] = datasets["validation"]
 
         if self.task in ["mr", "cr", "subj", "SST-2", "trec",  "sst-5",
-                         "boolq", "rte", "cb", "wic", "qnli", "qqp", "mrpc", "twitter"]:
+                         "boolq", "rte", "cb", "wic", "qnli", "qqp", "mrpc", "twitter", "reddit"]:
             # First filter, then shuffle, otherwise this results in a bug.
             # Samples `num_samples` elements from train as training and development sets.
             sampled_train = []
             sampled_dev = []
             for label in range(self.num_labels):
-                if self.task == "twitter":
+                if self.task in {"twitter", "reddit"}:
                     # Sample labels for multi-label task
                     # Also check that the sample has not been added before (can happen for multi-label samples)
                     data = shuffled_train.filter(lambda example: ((example["label"][label] > 0) and (example not in sampled_train)))
@@ -79,7 +79,7 @@ class AbstractTask(abc.ABC):
         if self.num_samples is not None:
             datasets = self.sample_datasets(datasets)
             datasets = self.post_processing(datasets)
-            if self.task != "twitter":
+            if self.task not in {"twitter", "reddit"}:
                 label_distribution_train = Counter(datasets["train"]["label"])
                 label_distribution_dev = Counter(datasets["validation"]["label"])
             else:
@@ -132,6 +132,11 @@ class SST5(MR):
 class Twitter(MR):
     task = "twitter"
     num_labels = 11
+    metric = [metrics.mse_multioutput, metrics.coverage, metrics.f1_multilabel_multioutput, metrics.lrap, metrics.accuracy_multilabel]
+
+class Reddit(MR):
+    task = "reddit"
+    num_labels = 8
     metric = [metrics.mse_multioutput, metrics.coverage, metrics.f1_multilabel_multioutput, metrics.lrap, metrics.accuracy_multilabel]
 
     
@@ -198,6 +203,7 @@ TASK_MAPPING = OrderedDict(
         ('SST-2', SST2),
         ('sst-5', SST5),
         ('twitter', Twitter),
+        ('reddit', Reddit),
         # superglue datasets.
         ('boolq', BoolQ),
         ('rte', RTE),
