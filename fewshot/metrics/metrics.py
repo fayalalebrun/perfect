@@ -33,6 +33,21 @@ def f1_multilabel_multioutput(y_pred, y_true, extra_info=None):
 
     return {"f1": f1_scores}
 
+def f1_report_per_class(y_pred, y_true, extra_info=None):
+    y_pred = np.stack(y_pred)
+    y_true = np.stack(y_true)
+
+    # if any entry >= 0.5 set to 1 else 0
+    y_pred = np.where(y_pred >= 0.5, 1, 0)
+
+    # calculate f1 score per label
+    f1_scores = []
+    for i in range(y_true.shape[1]):
+        f1_scores.append(f1_score(y_true[:, i], y_pred[:, i]))
+
+
+    return {"f1_per_class": f1_scores}
+
 def coverage(y_pred, y_true, extra_info=None):
     y_pred = np.stack(y_pred)
     y_true = np.stack(y_true)

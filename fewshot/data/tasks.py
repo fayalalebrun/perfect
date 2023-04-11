@@ -132,12 +132,12 @@ class SST5(MR):
 class Twitter(MR):
     task = "twitter"
     num_labels = 11
-    metric = [metrics.mse_multioutput, metrics.coverage, metrics.f1_multilabel_multioutput, metrics.lrap, metrics.accuracy_multilabel]
+    metric = [metrics.coverage, metrics.f1_multilabel_multioutput, metrics.f1_report_per_class ,metrics.lrap]
 
 class Reddit(MR):
     task = "reddit"
     num_labels = 8
-    metric = [metrics.mse_multioutput, metrics.coverage, metrics.f1_multilabel_multioutput, metrics.lrap, metrics.accuracy_multilabel]
+    metric = [metrics.coverage, metrics.f1_multilabel_multioutput, metrics.f1_report_per_class, metrics.lrap]
 
     
 class BoolQ(AbstractTask):
