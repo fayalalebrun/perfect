@@ -33,6 +33,14 @@ def f1_multilabel_multioutput(y_pred, y_true, extra_info=None):
 
     return {"f1": f1_scores}
 
+def list_to_string(list):
+    string = ""
+    for i in range(len(list)):
+        string += str(list[i])
+        if i != len(list) - 1:
+            string += ", "
+    return  string
+
 def f1_report_per_class(y_pred, y_true, extra_info=None):
     y_pred = np.stack(y_pred)
     y_true = np.stack(y_true)
@@ -45,8 +53,8 @@ def f1_report_per_class(y_pred, y_true, extra_info=None):
     for i in range(y_true.shape[1]):
         f1_scores.append(f1_score(y_true[:, i], y_pred[:, i]))
 
-
-    return {"f1_per_class": f1_scores}
+    f1_scores_str = list_to_string(f1_scores)
+    return {"f1_per_class": f1_scores_str}
 
 def coverage(y_pred, y_true, extra_info=None):
     y_pred = np.stack(y_pred)
