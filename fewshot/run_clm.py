@@ -404,7 +404,7 @@ def main():
         task=data_args.task,
         metrics=task.metric,
         extra_info = extra_info,
-        callbacks = [EarlyStoppingCallback(early_stopping_patience=20)]
+        callbacks = [EarlyStoppingCallback(early_stopping_patience=2, early_stopping_threshold=0.3)]
     )
 
     print("Training dataset", trainer.train_dataset.data)
