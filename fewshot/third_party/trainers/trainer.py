@@ -185,14 +185,14 @@ class BaseTrainer(Trainer):
         logger.info(f"  Num examples = {num_samples}")
 
         model.eval()
-        metrics = self.compute_pet_metrics(eval_datasets, model, self.extra_info[metric_key_prefix])
+        metrics, predictions = self.compute_pet_metrics(eval_datasets, model, self.extra_info[metric_key_prefix])
 
         # Prefix all keys with metric_key_prefix + '_'
         for key in list(metrics.keys()):
             if not key.startswith(f"{metric_key_prefix}_"):
                 metrics[f"{metric_key_prefix}_{key}"] = metrics.pop(key)
 
-        return EvalLoopOutput(predictions=None, label_ids=None, metrics=metrics, num_samples=num_samples)
+        return EvalLoopOutput(predictions=predictions, label_ids=None, metrics=metrics, num_samples=num_samples)
 
     def _get_per_token_train_centroids_from_label_embeddings(self, model):
         centroids = {}
@@ -232,7 +232,7 @@ class BaseTrainer(Trainer):
 
             results.update(metric(y_hats, labels, extra_info))
 
-        return results
+        return results, np.stack(y_hats)
 
     def evaluate_pet(self, model, batch, centroids=None):
         """Evaluates the model on the given inputs."""
